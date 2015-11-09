@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.3)
+project(rApp)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_PREFIX_PATH "/Users/brycecater/Qt/5.5/clang_64")
+# Find the QtWidgets library
+find_package(Qt5Widgets)
+
+add_subdirectory("../../Firmware/rWifi" "rWifi")
+include_directories("../../Firmware/rWifi")
+
+add_executable(rApp main.cpp rApp.cpp rApp.h)
+add_executable(fakeRover fakeRover.cpp fakeRover.h)
+add_executable(simpleTest simpleTest.cpp)
+
+target_link_libraries(rApp Qt5::Widgets)
+target_link_libraries(rApp rWifi)
+target_link_libraries(fakeRover rWifi)
+
+
+#get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+#foreach(dir ${dirs})
+#    message(STATUS "dir='${dir}'")
+#endforeach()
