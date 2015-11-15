@@ -16,12 +16,16 @@ rAppMainView::rAppMainView(QWidget *parent)
     QPushButton *driveBackwardButton = new QPushButton("REVERSE", this);
     QPushButton *turnLeftButton = new QPushButton("LEFT", this);
     QPushButton *turnRightButton = new QPushButton("RIGHT", this);
+    QPushButton *stopDrivingButton = new QPushButton("STOP", this);
+    QPushButton *startStreamButton = new QPushButton("Start Stream", this);
 
     listenButton->resize(400, 30);
     driveForwardButton->resize(100, 100);
     driveBackwardButton->resize(100, 100);
     turnLeftButton->resize(100, 100);
     turnRightButton->resize(100, 100);
+    stopDrivingButton->resize(100, 100);
+    startStreamButton->resize(100, 100);
 
     this->titleLabel = new QLabel("ROVER", this);
 
@@ -29,12 +33,14 @@ rAppMainView::rAppMainView(QWidget *parent)
     QGridLayout *driveLayout = new QGridLayout(this);
     mainLayout->addWidget(this->titleLabel, 0, 0, Qt::AlignHCenter);
     mainLayout->addWidget(listenButton, 1, 0, Qt::AlignHCenter);
-    mainLayout->addLayout(driveLayout, 2, 0, Qt::AlignHCenter);
+    mainLayout->addWidget(startStreamButton, 2, 0, Qt::AlignHCenter);
+    mainLayout->addLayout(driveLayout, 3, 0, Qt::AlignHCenter);
 
     driveLayout->addWidget(driveForwardButton, 0, 1, Qt::AlignHCenter);
     driveLayout->addWidget(driveBackwardButton, 2, 1, Qt::AlignHCenter);
     driveLayout->addWidget(turnLeftButton, 1, 0, Qt::AlignHCenter);
     driveLayout->addWidget(turnRightButton, 1, 2, Qt::AlignHCenter);
+    driveLayout->addWidget(stopDrivingButton, 1, 1, Qt::AlignHCenter);
 
     this->setLayout(mainLayout);
 
@@ -43,11 +49,14 @@ rAppMainView::rAppMainView(QWidget *parent)
     connect(driveBackwardButton, SIGNAL(clicked()), this, SLOT(drivBackwards()));
     connect(turnLeftButton, SIGNAL(clicked()), this, SLOT(turnLeft()));
     connect(turnRightButton, SIGNAL(clicked()), this, SLOT(turnRight()));
+    connect(stopDrivingButton, SIGNAL(clicked()), this, SLOT(stopDriving()));
+    connect(startStreamButton, SIGNAL(clicked()), this, SLOT(startStream()));
 }
 
 void rAppMainView::listen()
 {
     this->networkManager->initializeNewConnection("COMMANDS", "127.0.0.1", 1024, RVR::ConnectionInitType::LISTEN);
+//    this->networkManager->initializeNewConnection("CAMERA", "127.0.0.1", 1025, RVR::ConnectionInitType::LISTEN);
 }
 
 void rAppMainView::driveForward()
@@ -98,4 +107,14 @@ void rAppMainView::stopDriving()
     cmd.setCommandType(RVR::CommandType::STOP_DRIVE);
     RVR::NetworkChunk nc = cmd.toNetworkChunk();
     this->networkManager->sendData("COMMANDS", &nc);
+}
+
+void rAppMainView::startStream()
+{
+//    VLOG(2) << "Issuing START_STREAM command";
+//    RVR::Command cmd = RVR::Command();
+//    cmd.setCommandType(RVR::CommandType::START_STREAM);
+//    RVR::NetworkChunk nc = cmd.toNetworkChunk();
+//    this->networkManager->sendData("COMMANDS", &nc);
+
 }

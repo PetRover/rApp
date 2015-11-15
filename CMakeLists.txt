@@ -14,6 +14,9 @@ find_package(Qt5Widgets)
 add_subdirectory("../../Firmware/rWifi" "rWifi")
 include_directories("../../Firmware/rWifi")
 
+add_subdirectory("../../Firmware/rCamera" "rCamera")
+include_directories("../../Firmware/rCamera")
+
 add_executable(rApp main.cpp rApp.cpp rApp.h)
 add_executable(fakeRover fakeRover.cpp fakeRover.h)
 add_executable(simpleTest simpleTest.cpp)
@@ -21,6 +24,11 @@ add_executable(simpleTest simpleTest.cpp)
 target_link_libraries(rApp Qt5::Widgets)
 target_link_libraries(rApp rWifi)
 target_link_libraries(fakeRover rWifi)
+target_link_libraries(fakeRover rCamera)
+
+FIND_PACKAGE(libuvc REQUIRED)
+INCLUDE_DIRECTORIES("${libuvc_INCLUDE_DIRS}")
+TARGET_LINK_LIBRARIES(fakeRover ${libuvc_LIBRARIES})
 
 
 #get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)

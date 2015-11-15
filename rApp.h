@@ -28,6 +28,7 @@ private slots:
     void turnLeft();
     void turnRight();
     void stopDriving();
+    void startStream();
 
 public:
     rAppMainView(QWidget *parent = 0);
