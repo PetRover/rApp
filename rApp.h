@@ -11,8 +11,28 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include <Qt>
+#include <rCamera.h>
 #include "../rCore/easylogging++.h"
 #include "rWifi.h"
+#include <QOpenGLWidget>
+#include <QPainter>
+#include <QTimer>
+extern "C" {
+#include <libswscale/swscale.h>
+#include <libavutil/frame.h>
+#include <libavcodec/avcodec.h>
+}
+
+class Canvas : public QOpenGLWidget
+{
+public:
+    Canvas(QWidget* parent = NULL);
+    void setImage(const QImage& image);
+protected:
+    void paintEvent(QPaintEvent*);
+private:
+    QImage img;
+};
 
 class rAppMainView : public QWidget
 {
@@ -20,6 +40,9 @@ Q_OBJECT // Must be used in classes that define their own signals and slots
 private:
     QLabel *titleLabel;
     RVR::NetworkManager *networkManager;
+    RVR::Camera* camera;
+    Canvas* canvas;
+    QLabel *myLabel;
 
 private slots:
     void listen();
@@ -29,6 +52,7 @@ private slots:
     void turnRight();
     void stopDriving();
     void startStream();
+    void getFrames();
 
 public:
     rAppMainView(QWidget *parent = 0);

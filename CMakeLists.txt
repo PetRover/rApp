@@ -23,6 +23,7 @@ add_executable(simpleTest simpleTest.cpp)
 
 target_link_libraries(rApp Qt5::Widgets)
 target_link_libraries(rApp rWifi)
+target_link_libraries(rApp rCamera)
 target_link_libraries(fakeRover rWifi)
 target_link_libraries(fakeRover rCamera)
 
@@ -30,6 +31,21 @@ FIND_PACKAGE(libuvc REQUIRED)
 INCLUDE_DIRECTORIES("${libuvc_INCLUDE_DIRS}")
 TARGET_LINK_LIBRARIES(fakeRover ${libuvc_LIBRARIES})
 
+
+find_package(YCM REQUIRED)
+FIND_PACKAGE(FFMPEG REQUIRED)
+TARGET_LINK_LIBRARIES(rApp ${FFMPEG_LIBRARIES})
+
+#
+#find_package(PkgConfig)
+##pkg_search_module(SWSCALE REQUIRED libswscale.pc)
+#
+#target_include_directories(rApp SYSTEM PUBLIC ${FFMPEG_INCLUDE_DIRS})
+#target_link_libraries(rApp ${FFMPEG_LIBRARIES})
+##TARGET_LINK_LIBRARIES(rApp swscale)
+#TARGET_LINK_LIBRARIES(rApp avutil)
+#TARGET_LINK_LIBRARIES(rApp avcodec)
+#TARGET_LINK_LIBRARIES(rCamera ${libuvc_LIBRARIES})
 
 #get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 #foreach(dir ${dirs})
