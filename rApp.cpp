@@ -55,7 +55,8 @@ rAppMainView::rAppMainView(QWidget *parent)
 
 void rAppMainView::listen()
 {
-    this->networkManager->initializeNewConnection("COMMANDS", "127.0.0.1", 1024, RVR::ConnectionInitType::LISTEN);
+//    this->networkManager->initializeNewConnection("COMMANDS", "192.168.7.1", "192.168.7.2", 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP);
+    this->networkManager->initializeNewConnection("COMMANDS", "192.168.7.1", "192.168.7.2", 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP);
 //    this->networkManager->initializeNewConnection("CAMERA", "127.0.0.1", 1025, RVR::ConnectionInitType::LISTEN);
 }
 
