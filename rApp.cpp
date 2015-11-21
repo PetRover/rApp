@@ -34,17 +34,15 @@ rAppMainView::rAppMainView(QWidget *parent)
     this->networkManager = new RVR::NetworkManager();
     this->networkManager->setConnectTimeout(10000);
 
-    this->camera = new RVR::Camera(this->networkManager);
+//    this->camera = new RVR::Camera(this->networkManager);
 
     this->canvas = new Canvas(this);
 
     this->myLabel = new QLabel(this); // sets parent of label to main window
 
-    VLOG(2) << "Setting stream at YUYV, 640px by 480px @ 30fps";
-    this->camera->setupStream(UVC_FRAME_FORMAT_YUYV, 640, 480, 30);
-    VLOG(2) << "Setting callback function to saveFrame()";
-    this->camera->setFrameCallback(RVR::queueFrame);
-    this->camera->setAutoExposure(true);
+    this->currentCamChunk = new RVR::NetworkChunk();
+
+    this->cameraImage = QImage( 640, 480, QImage::Format_RGB888);
 
     QPushButton *listenButton = new QPushButton("listen", this);
     QPushButton *driveForwardButton = new QPushButton("FORWARD", this);
@@ -53,6 +51,7 @@ rAppMainView::rAppMainView(QWidget *parent)
     QPushButton *turnRightButton = new QPushButton("RIGHT", this);
     QPushButton *stopDrivingButton = new QPushButton("STOP", this);
     QPushButton *startStreamButton = new QPushButton("Start Stream", this);
+    QPushButton *flipCameraButton = new QPushButton("Flip Camera", this);
 
     listenButton->resize(400, 30);
     driveForwardButton->resize(100, 100);
@@ -61,6 +60,7 @@ rAppMainView::rAppMainView(QWidget *parent)
     turnRightButton->resize(100, 100);
     stopDrivingButton->resize(100, 100);
     startStreamButton->resize(100, 100);
+    flipCameraButton->resize(100, 100);
 
     this->titleLabel = new QLabel("ROVER", this);
 
@@ -71,6 +71,7 @@ rAppMainView::rAppMainView(QWidget *parent)
     mainLayout->addWidget(this->myLabel, 2, 0, Qt::AlignHCenter);
     mainLayout->addWidget(startStreamButton, 3, 0, Qt::AlignHCenter);
     mainLayout->addLayout(driveLayout, 4, 0, Qt::AlignHCenter);
+    mainLayout->addWidget(flipCameraButton, 5, 0, Qt::AlignHCenter);
 
     driveLayout->addWidget(driveForwardButton, 0, 1, Qt::AlignHCenter);
     driveLayout->addWidget(driveBackwardButton, 2, 1, Qt::AlignHCenter);
@@ -87,17 +88,17 @@ rAppMainView::rAppMainView(QWidget *parent)
     connect(turnRightButton, SIGNAL(clicked()), this, SLOT(turnRight()));
     connect(stopDrivingButton, SIGNAL(clicked()), this, SLOT(stopDriving()));
     connect(startStreamButton, SIGNAL(clicked()), this, SLOT(startStream()));
+    connect(flipCameraButton, SIGNAL(clicked()), this, SLOT(flipCamera()));
 
-    QTimer *frameTimer = new QTimer();
-    connect(frameTimer, SIGNAL(timeout()), this, SLOT(getFrames()));
-    frameTimer->start(10);
+    this->frameTimer = new QTimer();
+    connect(this->frameTimer, SIGNAL(timeout()), this, SLOT(getFrames()));
 }
 
 void rAppMainView::listen()
 {
-//    this->networkManager->initializeNewConnection("COMMANDS", "192.168.7.1", "192.168.7.2", 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP);
-    this->networkManager->initializeNewConnection("COMMANDS", "192.168.7.1", "192.168.7.2", 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP);
-//    this->networkManager->initializeNewConnection("CAMERA", "127.0.0.1", 1025, RVR::ConnectionInitType::LISTEN);
+    this->networkManager->initializeNewConnection("COMMANDS", "192.168.1.3", "192.168.1.6", 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP);
+    this->networkManager->initializeNewConnection("CAMERA", "192.168.1.3", "192.168.1.6", 1025, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP);
+
 }
 
 void rAppMainView::driveForward()
@@ -152,46 +153,106 @@ void rAppMainView::stopDriving()
 
 void rAppMainView::startStream()
 {
-    this->camera->startStream();
+
+    VLOG(2) << "Issuing START_STREAM command";
+    RVR::Command cmd = RVR::Command();
+    cmd.setCommandType(RVR::CommandType::START_STREAM);
+    RVR::NetworkChunk nc = cmd.toNetworkChunk();
+    this->networkManager->sendData("COMMANDS", &nc);
+    this->frameTimer->start(10);
+    usleep(100000);
+    this->stopDriving();
+    usleep(100000);
+    this->stopDriving();
+    usleep(100000);
+    this->stopDriving();
+//    VLOG(2) << "Setting stream at YUYV, 640px by 480px @ 30fps";
+//    this->camera->setupStream(UVC_FRAME_FORMAT_YUYV, 640, 480, 30);
+//    VLOG(2) << "Setting callback function to saveFrame()";
+//    this->camera->setFrameCallback(RVR::queueFrame);
+//    this->camera->setAutoExposure(true);
+//
+//
+//    this->camera->startStream();
 
 //    VLOG(2) << "Issuing START_STREAM command";
 //    RVR::Command cmd = RVR::Command();
 //    cmd.setCommandType(RVR::CommandType::START_STREAM);
 //    RVR::NetworkChunk nc = cmd.toNetworkChunk();
 //    this->networkManager->sendData("COMMANDS", &nc);
+}
 
+void rAppMainView::flipCamera()
+{
+    VLOG(2) << "Issuing FLIP_CAMERA command";
+    RVR::Command cmd = RVR::Command();
+    cmd.setCommandType(RVR::CommandType::FLIP_CAMPERA);
+    RVR::NetworkChunk nc = cmd.toNetworkChunk();
+    this->networkManager->sendData("COMMANDS", &nc);
 }
 
 void rAppMainView::getFrames()
 {
-    if (!this->camera->frameQueue.empty())
+    VLOG(3) << "getting frames ";
+    RVR::ReceiveType rt = this->networkManager->getData("CAMERA", this->currentCamChunk);
+    if (rt == RVR::ReceiveType::NETWORKCHUNK)
     {
-        VLOG(3) << "Got frame from a queue with length: " << this->camera->frameQueue.size();
-        RVR::NetworkChunk* nc = this->camera->frameQueue.front();
-        this->camera->frameQueue.pop();
-        unsigned char* yuvdata = (unsigned char*)nc->getData();
-
-
-        SwsContext *ConversionContext;
-        ConversionContext = sws_getCachedContext(NULL, 640, 480, AV_PIX_FMT_YUYV422 , 640, 480, AV_PIX_FMT_RGB24, SWS_BILINEAR, 0, 0, 0);
-
-        AVFrame* yuvFrame = av_frame_alloc();
-        AVFrame* rgbFrame = av_frame_alloc();
-
-        int num_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, 640, 480);
-        uint8_t* rgbFrame_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
-
-        avpicture_fill((AVPicture*)rgbFrame, rgbFrame_buffer, AV_PIX_FMT_RGB24, 640, 480);
-        avpicture_fill((AVPicture*)yuvFrame, yuvdata, AV_PIX_FMT_YUYV422, 640, 480);
-
-        sws_scale(ConversionContext, (const uint8_t* const*)yuvFrame->data, yuvFrame->linesize, 0, 480, rgbFrame->data, rgbFrame->linesize);
-
-        QImage img = QImage( 640, 480, QImage::Format_RGB888);
-        for( int y = 0; y < 480; ++y )
+        if (this->currentCamChunk->getDataType() == RVR::DataType::CAMERA)
         {
-            memcpy( img.scanLine(y), rgbFrame->data[0]+y * rgbFrame->linesize[0],  rgbFrame->linesize[0]  );
+            unsigned char* yuvdata = (unsigned char*)this->currentCamChunk->getData();
+
+            SwsContext *ConversionContext;
+            ConversionContext = sws_getCachedContext(NULL, 640, 480, AV_PIX_FMT_YUYV422 , 640, 480, AV_PIX_FMT_RGB24, SWS_BILINEAR, 0, 0, 0);
+
+            AVFrame* yuvFrame = av_frame_alloc();
+            AVFrame* rgbFrame = av_frame_alloc();
+
+            int num_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, 640, 480);
+            uint8_t* rgbFrame_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
+
+            avpicture_fill((AVPicture*)rgbFrame, rgbFrame_buffer, AV_PIX_FMT_RGB24, 640, 480);
+            avpicture_fill((AVPicture*)yuvFrame, yuvdata, AV_PIX_FMT_YUYV422, 640, 480);
+
+            sws_scale(ConversionContext, (const uint8_t* const*)yuvFrame->data, yuvFrame->linesize, 0, 480, rgbFrame->data, rgbFrame->linesize);
+
+            for( int y = 0; y < 480; ++y )
+            {
+                memcpy( this->cameraImage.scanLine(y), rgbFrame->data[0]+y * rgbFrame->linesize[0],  rgbFrame->linesize[0]  );
+            }
+
+            myLabel->setPixmap(QPixmap::fromImage(this->cameraImage));
         }
-        myLabel->setPixmap(QPixmap::fromImage(img));
-//        this->canvas->setImage(img);
     }
+    VLOG(3) << "[DONE] getting frames ";
+
+//    if (!this->camera->frameQueue.empty())
+//    {
+//        VLOG(3) << "Got frame from a queue with length: " << this->camera->frameQueue.size();
+//        RVR::NetworkChunk* nc = this->camera->frameQueue.front();
+//        this->camera->frameQueue.pop();
+//        unsigned char* yuvdata = (unsigned char*)nc->getData();
+//
+//
+//        SwsContext *ConversionContext;
+//        ConversionContext = sws_getCachedContext(NULL, 640, 480, AV_PIX_FMT_YUYV422 , 640, 480, AV_PIX_FMT_RGB24, SWS_BILINEAR, 0, 0, 0);
+//
+//        AVFrame* yuvFrame = av_frame_alloc();
+//        AVFrame* rgbFrame = av_frame_alloc();
+//
+//        int num_bytes = avpicture_get_size(AV_PIX_FMT_RGB24, 640, 480);
+//        uint8_t* rgbFrame_buffer = (uint8_t *)av_malloc(num_bytes*sizeof(uint8_t));
+//
+//        avpicture_fill((AVPicture*)rgbFrame, rgbFrame_buffer, AV_PIX_FMT_RGB24, 640, 480);
+//        avpicture_fill((AVPicture*)yuvFrame, yuvdata, AV_PIX_FMT_YUYV422, 640, 480);
+//
+//        sws_scale(ConversionContext, (const uint8_t* const*)yuvFrame->data, yuvFrame->linesize, 0, 480, rgbFrame->data, rgbFrame->linesize);
+//
+//        QImage img = QImage( 640, 480, QImage::Format_RGB888);
+//        for( int y = 0; y < 480; ++y )
+//        {
+//            memcpy( img.scanLine(y), rgbFrame->data[0]+y * rgbFrame->linesize[0],  rgbFrame->linesize[0]  );
+//        }
+//        myLabel->setPixmap(QPixmap::fromImage(img));
+////        this->canvas->setImage(img);
+//    }
 }

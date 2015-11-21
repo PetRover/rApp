@@ -11,7 +11,7 @@
 #include <QPushButton>
 #include <QGridLayout>
 #include <Qt>
-#include <rCamera.h>
+//#include <rCamera.h>
 #include "../rCore/easylogging++.h"
 #include "rWifi.h"
 #include <QOpenGLWidget>
@@ -40,9 +40,12 @@ Q_OBJECT // Must be used in classes that define their own signals and slots
 private:
     QLabel *titleLabel;
     RVR::NetworkManager *networkManager;
-    RVR::Camera* camera;
+//    RVR::Camera* camera;
     Canvas* canvas;
     QLabel *myLabel;
+    RVR::NetworkChunk* currentCamChunk;
+    QImage cameraImage;
+    QTimer *frameTimer;
 
 private slots:
     void listen();
@@ -52,6 +55,7 @@ private slots:
     void turnRight();
     void stopDriving();
     void startStream();
+    void flipCamera();
     void getFrames();
 
 public:

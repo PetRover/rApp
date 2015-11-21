@@ -14,8 +14,10 @@ find_package(Qt5Widgets)
 add_subdirectory("../../Firmware/rWifi" "rWifi")
 include_directories("../../Firmware/rWifi")
 
-add_subdirectory("../../Firmware/rCamera" "rCamera")
+#add_subdirectory("../../Firmware/rCamera" "rCamera")
 include_directories("../../Firmware/rCamera")
+include_directories("../../Firmware/rCamera/LinuxHeaders")
+
 
 add_executable(rApp main.cpp rApp.cpp rApp.h)
 add_executable(fakeRover fakeRover.cpp fakeRover.h)
@@ -23,7 +25,7 @@ add_executable(simpleTest simpleTest.cpp)
 
 target_link_libraries(rApp Qt5::Widgets)
 target_link_libraries(rApp rWifi)
-target_link_libraries(rApp rCamera)
+#target_link_libraries(rApp rCamera)
 target_link_libraries(fakeRover rWifi)
 target_link_libraries(fakeRover rCamera)
 
