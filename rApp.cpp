@@ -5,28 +5,28 @@
 #include <sys/socket.h>
 #include <qimage.h>
 #include "rApp.h"
-
-Canvas::Canvas(QWidget* parent)
-        : QOpenGLWidget(parent)
-{
-    setFixedSize(200, 200);
-    setAutoFillBackground(false);
-}
-
-void Canvas::setImage(const QImage& image)
-{
-    img = image;
-}
-
-void Canvas::paintEvent(QPaintEvent*)
-{
-    QPainter p(this);
-
-    //Set the painter to use a smooth scaling algorithm.
-    p.setRenderHint(QPainter::SmoothPixmapTransform, 1);
-
-    p.drawImage(this->rect(), img);
-}
+//
+//Canvas::Canvas(QWidget* parent)
+//        : QOpenGLWidget(parent)
+//{
+//    setFixedSize(200, 200);
+//    setAutoFillBackground(false);
+//}
+//
+//void Canvas::setImage(const QImage& image)
+//{
+//    img = image;
+//}
+//
+//void Canvas::paintEvent(QPaintEvent*)
+//{
+//    QPainter p(this);
+//
+//    //Set the painter to use a smooth scaling algorithm.
+//    p.setRenderHint(QPainter::SmoothPixmapTransform, 1);
+//
+//    p.drawImage(this->rect(), img);
+//}
 
 rAppMainView::rAppMainView(QWidget *parent)
 : QWidget(parent)
@@ -36,7 +36,7 @@ rAppMainView::rAppMainView(QWidget *parent)
 
 //    this->camera = new RVR::Camera(this->networkManager);
 
-    this->canvas = new Canvas(this);
+//    this->canvas = new Canvas(this);
 
     this->myLabel = new QLabel(this); // sets parent of label to main window
 
@@ -83,7 +83,7 @@ rAppMainView::rAppMainView(QWidget *parent)
 
     connect(listenButton, SIGNAL(clicked()), this, SLOT(listen()));
     connect(driveForwardButton, SIGNAL(clicked()), this, SLOT(driveForward()));
-    connect(driveBackwardButton, SIGNAL(clicked()), this, SLOT(drivBackwards()));
+    connect(driveBackwardButton, SIGNAL(clicked()), this, SLOT(driveBackwards()));
     connect(turnLeftButton, SIGNAL(clicked()), this, SLOT(turnLeft()));
     connect(turnRightButton, SIGNAL(clicked()), this, SLOT(turnRight()));
     connect(stopDrivingButton, SIGNAL(clicked()), this, SLOT(stopDriving()));
@@ -96,8 +96,8 @@ rAppMainView::rAppMainView(QWidget *parent)
 
 void rAppMainView::listen()
 {
-    this->networkManager->initializeNewConnection("COMMANDS", "192.168.1.3", "192.168.1.5", 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP);
-    this->networkManager->initializeNewConnection("CAMERA", "192.168.1.3", "192.168.1.5", 1025, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP);
+    this->networkManager->initializeNewConnection("COMMANDS", "192.168.7.1", "192.168.7.2", 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP);
+    this->networkManager->initializeNewConnection("CAMERA","192.168.7.1", "192.168.7.2", 1025, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP);
 
 }
 
@@ -107,18 +107,20 @@ void rAppMainView::driveForward()
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::DRIVE_FORWARD);
     cmd.setCommandData((char *)"50");
-    RVR::NetworkChunk nc = cmd.toNetworkChunk();
-    this->networkManager->sendData("COMMANDS", &nc);
+    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
+    *nc = cmd.toNetworkChunk();
+    this->networkManager->sendData("COMMANDS", nc);
 }
 
-void rAppMainView::drivBackwards()
+void rAppMainView::driveBackwards()
 {
     VLOG(2) << "Issuing DRIVE_BACKWARD command";
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::DRIVE_BACKWARD);
     cmd.setCommandData((char *)"50");
-    RVR::NetworkChunk nc = cmd.toNetworkChunk();
-    this->networkManager->sendData("COMMANDS", &nc);
+    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
+    *nc = cmd.toNetworkChunk();
+    this->networkManager->sendData("COMMANDS", nc);
 }
 
 void rAppMainView::turnLeft()
@@ -127,8 +129,9 @@ void rAppMainView::turnLeft()
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::TURN_LEFT);
 //    cmd.setCommandData((char *)"50");
-    RVR::NetworkChunk nc = cmd.toNetworkChunk();
-    this->networkManager->sendData("COMMANDS", &nc);
+    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
+    *nc = cmd.toNetworkChunk();
+    this->networkManager->sendData("COMMANDS", nc);
 }
 
 void rAppMainView::turnRight()
@@ -137,9 +140,10 @@ void rAppMainView::turnRight()
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::TURN_RIGHT);
 //    cmd.setCommandData((char *)"50");
-    RVR::NetworkChunk nc = cmd.toNetworkChunk();
+    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
+    *nc = cmd.toNetworkChunk();
     VLOG(2) << "Command is all set up.. getting ready to send it";
-    this->networkManager->sendData("COMMANDS", &nc);
+    this->networkManager->sendData("COMMANDS", nc);
 }
 
 void rAppMainView::stopDriving()
@@ -147,18 +151,21 @@ void rAppMainView::stopDriving()
     VLOG(2) << "Issuing STOP_DRIVE command";
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::STOP_DRIVE);
-    RVR::NetworkChunk nc = cmd.toNetworkChunk();
-    this->networkManager->sendData("COMMANDS", &nc);
+    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
+    *nc = cmd.toNetworkChunk();
+    this->networkManager->sendData("COMMANDS", nc);
 }
 
 void rAppMainView::startStream()
 {
+//    this->camera->startStream();
 
     VLOG(2) << "Issuing START_STREAM command";
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::START_STREAM);
-    RVR::NetworkChunk nc = cmd.toNetworkChunk();
-    this->networkManager->sendData("COMMANDS", &nc);
+    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
+    *nc = cmd.toNetworkChunk();
+    this->networkManager->sendData("COMMANDS", nc);
     this->frameTimer->start(0);
 }
 
@@ -167,13 +174,15 @@ void rAppMainView::flipCamera()
     VLOG(2) << "Issuing FLIP_CAMERA command";
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::FLIP_CAMPERA);
-    RVR::NetworkChunk nc = cmd.toNetworkChunk();
-    this->networkManager->sendData("COMMANDS", &nc);
+    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
+    *nc = cmd.toNetworkChunk();
+    this->networkManager->sendData("COMMANDS", nc);
 }
 
 void rAppMainView::getFrames()
 {
     VLOG(3) << "getting frames ";
+
     RVR::ReceiveType rt = this->networkManager->getData("CAMERA", this->currentCamChunk);
     if (rt == RVR::ReceiveType::NETWORKCHUNK)
     {

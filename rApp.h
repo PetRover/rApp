@@ -14,25 +14,25 @@
 //#include <rCamera.h>
 #include "../rCore/easylogging++.h"
 #include "rWifi.h"
-#include <QOpenGLWidget>
+//#include <QOpenGLWidget>
 #include <QPainter>
 #include <QTimer>
-extern "C" {
-#include <libswscale/swscale.h>
-#include <libavutil/frame.h>
-#include <libavcodec/avcodec.h>
-}
+//extern "C" {
+//#include <libswscale/swscale.h>
+//#include <libavutil/frame.h>
+//#include <libavcodec/avcodec.h>
+//}
 
-class Canvas : public QOpenGLWidget
-{
-public:
-    Canvas(QWidget* parent = NULL);
-    void setImage(const QImage& image);
-protected:
-    void paintEvent(QPaintEvent*);
-private:
-    QImage img;
-};
+//class Canvas : public QOpenGLWidget
+//{
+//public:
+//    Canvas(QWidget* parent = NULL);
+//    void setImage(const QImage& image);
+//protected:
+//    void paintEvent(QPaintEvent*);
+//private:
+//    QImage img;
+//};
 
 class rAppMainView : public QWidget
 {
@@ -41,7 +41,7 @@ private:
     QLabel *titleLabel;
     RVR::NetworkManager *networkManager;
 //    RVR::Camera* camera;
-    Canvas* canvas;
+//    Canvas* canvas;
     QLabel *myLabel;
     RVR::NetworkChunk* currentCamChunk;
     QImage cameraImage;
@@ -50,7 +50,7 @@ private:
 private slots:
     void listen();
     void driveForward();
-    void drivBackwards();
+    void driveBackwards();
     void turnLeft();
     void turnRight();
     void stopDriving();

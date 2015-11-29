@@ -20,18 +20,18 @@ include_directories("../../Firmware/rCamera/LinuxHeaders")
 
 
 add_executable(rApp main.cpp rApp.cpp rApp.h)
-add_executable(fakeRover fakeRover.cpp fakeRover.h)
+#add_executable(fakeRover fakeRover.cpp fakeRover.h)
 add_executable(simpleTest simpleTest.cpp)
 
 target_link_libraries(rApp Qt5::Widgets)
 target_link_libraries(rApp rWifi)
 #target_link_libraries(rApp rCamera)
-target_link_libraries(fakeRover rWifi)
-target_link_libraries(fakeRover rCamera)
+#target_link_libraries(fakeRover rWifi)
+#target_link_libraries(fakeRover rCamera)
 
 FIND_PACKAGE(libuvc REQUIRED)
 INCLUDE_DIRECTORIES("${libuvc_INCLUDE_DIRS}")
-TARGET_LINK_LIBRARIES(fakeRover ${libuvc_LIBRARIES})
+#TARGET_LINK_LIBRARIES(fakeRover ${libuvc_LIBRARIES})
 
 
 find_package(YCM REQUIRED)
