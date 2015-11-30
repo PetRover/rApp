@@ -107,8 +107,7 @@ void rAppMainView::driveForward()
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::DRIVE_FORWARD);
     cmd.setCommandData((char *)"50");
-    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
-    *nc = cmd.toNetworkChunk();
+    RVR::NetworkChunk *nc = cmd.toNetworkChunk();
     this->networkManager->sendData("COMMANDS", nc);
 }
 
@@ -118,8 +117,7 @@ void rAppMainView::driveBackwards()
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::DRIVE_BACKWARD);
     cmd.setCommandData((char *)"50");
-    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
-    *nc = cmd.toNetworkChunk();
+    RVR::NetworkChunk *nc = cmd.toNetworkChunk();
     this->networkManager->sendData("COMMANDS", nc);
 }
 
@@ -129,8 +127,7 @@ void rAppMainView::turnLeft()
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::TURN_LEFT);
 //    cmd.setCommandData((char *)"50");
-    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
-    *nc = cmd.toNetworkChunk();
+    RVR::NetworkChunk *nc = cmd.toNetworkChunk();
     this->networkManager->sendData("COMMANDS", nc);
 }
 
@@ -140,8 +137,7 @@ void rAppMainView::turnRight()
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::TURN_RIGHT);
 //    cmd.setCommandData((char *)"50");
-    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
-    *nc = cmd.toNetworkChunk();
+    RVR::NetworkChunk *nc = cmd.toNetworkChunk();
     VLOG(2) << "Command is all set up.. getting ready to send it";
     this->networkManager->sendData("COMMANDS", nc);
 }
@@ -151,8 +147,7 @@ void rAppMainView::stopDriving()
     VLOG(2) << "Issuing STOP_DRIVE command";
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::STOP_DRIVE);
-    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
-    *nc = cmd.toNetworkChunk();
+    RVR::NetworkChunk *nc = cmd.toNetworkChunk();
     this->networkManager->sendData("COMMANDS", nc);
 }
 
@@ -163,8 +158,7 @@ void rAppMainView::startStream()
     VLOG(2) << "Issuing START_STREAM command";
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::START_STREAM);
-    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
-    *nc = cmd.toNetworkChunk();
+    RVR::NetworkChunk *nc = cmd.toNetworkChunk();
     this->networkManager->sendData("COMMANDS", nc);
     this->frameTimer->start(0);
 }
@@ -174,8 +168,7 @@ void rAppMainView::flipCamera()
     VLOG(2) << "Issuing FLIP_CAMERA command";
     RVR::Command cmd = RVR::Command();
     cmd.setCommandType(RVR::CommandType::FLIP_CAMPERA);
-    RVR::NetworkChunk *nc = new RVR::NetworkChunk;
-    *nc = cmd.toNetworkChunk();
+    RVR::NetworkChunk *nc = cmd.toNetworkChunk();
     this->networkManager->sendData("COMMANDS", nc);
 }
 

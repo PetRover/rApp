@@ -43,7 +43,7 @@ private:
 //    RVR::Camera* camera;
 //    Canvas* canvas;
     QLabel *myLabel;
-    RVR::NetworkChunk* currentCamChunk;
+    RVR::NetworkChunk* currentCamChunk = new RVR::NetworkChunk();
     QImage cameraImage;
     QTimer *frameTimer;
 
