@@ -5,61 +5,63 @@
 #ifndef RAPP_RAPP_H
 #define RAPP_RAPP_H
 
+#include "rAppParams.h"
 #include <QApplication>
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
 #include <QGridLayout>
+#include <QProgressBar>
+#include <QKeyEvent>
+#include <QEvent>
+//#include <QSizePolicy>
+#include <QObject>
 #include <Qt>
-//#include <rCamera.h>
+#include <QtGui>
 #include "../rCore/easylogging++.h"
 #include "rWifi.h"
-//#include <QOpenGLWidget>
+#include "rCamera.h"
 #include <QPainter>
 #include <QTimer>
-//extern "C" {
-//#include <libswscale/swscale.h>
-//#include <libavutil/frame.h>
-//#include <libavcodec/avcodec.h>
-//}
 
-//class Canvas : public QOpenGLWidget
-//{
-//public:
-//    Canvas(QWidget* parent = NULL);
-//    void setImage(const QImage& image);
-//protected:
-//    void paintEvent(QPaintEvent*);
-//private:
-//    QImage img;
-//};
 
 class rAppMainView : public QWidget
 {
 Q_OBJECT // Must be used in classes that define their own signals and slots
 private:
-    QLabel *titleLabel;
+    RVR::Command* cmd;
+    QLabel *statusLabel;
     RVR::NetworkManager *networkManager;
-//    RVR::Camera* camera;
-//    Canvas* canvas;
-    QLabel *myLabel;
-    RVR::NetworkChunk* currentCamChunk = new RVR::NetworkChunk();
+    QLabel *roverStreamLabel;
+    RVR::NetworkChunk* currentCamChunk;
     QImage cameraImage;
     QTimer *frameTimer;
+    QProgressBar* progressBar;
+    QPushButton *connectButton;
+    QPushButton *startStreamButton;
+    QPushButton *flipCameraButton;
+    QPushButton *dispenseTreatButton;
+    QWidget *controlHolder;
+
+    bool cameraFlipped = false;
+    bool connected = false;
+
+    void sendCommand(RVR::CommandType, int value);
 
 private slots:
-    void listen();
-    void driveForward();
-    void driveBackwards();
-    void turnLeft();
-    void turnRight();
-    void stopDriving();
+    void waitForConnection();
     void startStream();
     void flipCamera();
+    void dispenseTreat();
     void getFrames();
+    void updateTreatCount();
 
 public:
     rAppMainView(QWidget *parent = 0);
+
+    void keyPressEvent(QKeyEvent* e);
+    void keyReleaseEvent(QKeyEvent *e);
+    bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif //RAPP_RAPP_H
