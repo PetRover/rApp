@@ -103,9 +103,9 @@ void rAppMainView::waitForConnection()
     this->statusLabel->show();
     this->repaint();
     qApp->processEvents();
-    if (this->networkManager->initializeNewConnection("COMMANDS", APP_IP, ROVER_IP, 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP))
+    if (this->networkManager->initializeNewConnectionAndConnect("COMMANDS", APP_IP, ROVER_IP, 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP))
     {
-        if (this->networkManager->initializeNewConnection("CAMERA", APP_IP, ROVER_IP, 1025, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP))
+        if (this->networkManager->initializeNewConnectionAndConnect("CAMERA", APP_IP, ROVER_IP, 1025, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP))
         {
             this->connected = true;
         }

@@ -5,7 +5,7 @@
 #ifndef RAPP_RAPP_H
 #define RAPP_RAPP_H
 
-#include "rAppParams.h"
+//#include "rAppParams.h"
 #include <QApplication>
 #include <QWidget>
 #include <QLabel>
