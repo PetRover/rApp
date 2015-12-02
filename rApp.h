@@ -35,7 +35,7 @@ private:
     RVR::NetworkChunk* currentCamChunk;
     QImage cameraImage;
     QTimer *frameTimer;
-    QTimer *heartbeatTimer;
+//    QTimer *heartbeatTimer;
     QProgressBar* progressBar;
     QPushButton *connectButton;
     QPushButton *startStreamButton;
@@ -54,7 +54,7 @@ private slots:
     void flipCamera();
     void dispenseTreat();
     void getFrames();
-    void processHeartbeat();
+//    void processHeartbeat();
     void updateTreatCount();
 
 public:

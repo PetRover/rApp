@@ -93,8 +93,8 @@ rAppMainView::rAppMainView(QWidget *parent)
     this->frameTimer = new QTimer();
     connect(this->frameTimer, SIGNAL(timeout()), this, SLOT(getFrames()));
 
-    this->heartbeatTimer = new QTimer();
-    connect(this->heartbeatTimer, SIGNAL(timeout()), this, SLOT(processHeartbeat()));
+//    this->heartbeatTimer = new QTimer();
+//    connect(this->heartbeatTimer, SIGNAL(timeout()), this, SLOT(processHeartbeat()));
 }
 
 void rAppMainView::waitForConnection()
@@ -108,23 +108,23 @@ void rAppMainView::waitForConnection()
     qApp->processEvents();
     if (this->networkManager->initializeNewConnectionAndConnect("COMMANDS", APP_IP, ROVER_IP, 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP))
     {
-        if (this->networkManager->initializeNewConnectionAndConnect("HEARTBEAT", APP_IP, ROVER_IP, 1026, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP))
-        {
-            if (this->networkManager->initializeNewConnectionAndConnect("CAMERA", APP_IP, ROVER_IP, 1025, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP))
+//        if (this->networkManager->initializeNewConnectionAndConnect("HEARTBEAT", APP_IP, ROVER_IP, 1026, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP))
+//        {
+            if (this->networkManager->initializeNewConnectionAndConnect("CAMERA", APP_IP, ROVER_IP, 1038, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP))
             {
                 this->connected = true;
-                this->heartbeatTimer->start(1000);
+//                this->heartbeatTimer->start(1000);
             }
             else
             {
                 this->networkManager->terminateConnection("COMMANDS");
-                this->networkManager->terminateConnection("HEARTBEAT");
+//                this->networkManager->terminateConnection("HEARTBEAT");
             }
-        }
-        else
-        {
-            this->networkManager->terminateConnection("COMMANDS");
-        }
+//        }
+//        else
+//        {
+//            this->networkManager->terminateConnection("COMMANDS");
+//        }
 
     }
 
@@ -181,10 +181,10 @@ void rAppMainView::getFrames()
     VLOG(3) << "[DONE] getting frames ";
 }
 
-void rAppMainView::processHeartbeat()
-{
+//void rAppMainView::processHeartbeat()
+//{
 //    this->networkManager->sendHeartBeat();
-}
+//}
 
 
 void rAppMainView::keyPressEvent(QKeyEvent *e)
