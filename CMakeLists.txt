@@ -10,7 +10,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_PREFIX_PATH "/Users/brycecater/Qt/5.5/clang_64")
 # Find the QtWidgets library
 find_package(Qt5Widgets)
-#find_package(Qt5Multimedia)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 add_subdirectory("../../Firmware/rWifi" "rWifi")
@@ -27,7 +26,6 @@ add_executable(rApp rApp.cpp rApp.h)
 add_executable(simpleTest simpleTest.cpp)
 
 target_link_libraries(rApp Qt5::Widgets)
-#target_link_libraries(rApp Qt5::Multimedia)
 target_link_libraries(rApp rWifi)
 target_link_libraries(rApp rCamera)
 #target_link_libraries(rApp rCamera)

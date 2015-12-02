@@ -5,7 +5,6 @@
 #ifndef RAPP_RAPP_H
 #define RAPP_RAPP_H
 
-//#include "rAppParams.h"
 #include <QApplication>
 #include <QWidget>
 #include <QLabel>
@@ -36,6 +35,7 @@ private:
     RVR::NetworkChunk* currentCamChunk;
     QImage cameraImage;
     QTimer *frameTimer;
+    QTimer *heartbeatTimer;
     QProgressBar* progressBar;
     QPushButton *connectButton;
     QPushButton *startStreamButton;
@@ -46,7 +46,7 @@ private:
     bool cameraFlipped = false;
     bool connected = false;
 
-    void sendCommand(RVR::CommandType, int value);
+    void sendCommand(RVR::CommandType, short value);
 
 private slots:
     void waitForConnection();
@@ -54,6 +54,7 @@ private slots:
     void flipCamera();
     void dispenseTreat();
     void getFrames();
+    void processHeartbeat();
     void updateTreatCount();
 
 public:

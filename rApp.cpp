@@ -92,6 +92,9 @@ rAppMainView::rAppMainView(QWidget *parent)
 
     this->frameTimer = new QTimer();
     connect(this->frameTimer, SIGNAL(timeout()), this, SLOT(getFrames()));
+
+    this->heartbeatTimer = new QTimer();
+    connect(this->heartbeatTimer, SIGNAL(timeout()), this, SLOT(sendHeartbeat()));
 }
 
 void rAppMainView::waitForConnection()
@@ -105,14 +108,24 @@ void rAppMainView::waitForConnection()
     qApp->processEvents();
     if (this->networkManager->initializeNewConnectionAndConnect("COMMANDS", APP_IP, ROVER_IP, 1024, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP))
     {
-        if (this->networkManager->initializeNewConnectionAndConnect("CAMERA", APP_IP, ROVER_IP, 1025, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP))
+        if (this->networkManager->initializeNewConnectionAndConnect("HEARTBEAT", APP_IP, ROVER_IP, 1026, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP))
         {
-            this->connected = true;
+            if (this->networkManager->initializeNewConnectionAndConnect("CAMERA", APP_IP, ROVER_IP, 1025, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP))
+            {
+                this->connected = true;
+                this->heartbeatTimer->start(1000);
+            }
+            else
+            {
+                this->networkManager->terminateConnection("COMMANDS");
+                this->networkManager->terminateConnection("HEARTBEAT");
+            }
         }
         else
         {
             this->networkManager->terminateConnection("COMMANDS");
         }
+
     }
 
 
@@ -166,6 +179,11 @@ void rAppMainView::getFrames()
         }
     }
     VLOG(3) << "[DONE] getting frames ";
+}
+
+void rAppMainView::processHeartbeat()
+{
+    this->networkManager->sendHeartBeat();
 }
 
 
@@ -235,7 +253,7 @@ bool rAppMainView::eventFilter(QObject *obj, QEvent *event)
     else if (event->type() == QEvent::ApplicationDeactivate)
     {
         VLOG(1) << "Losing focus, stopping drive!";
-        this->sendCommand(RVR::CommandType::STOP_ALL, 0);
+        this->sendCommand(RVR::CommandType::STOP_ALL, -100);
     }
 
     else
@@ -244,16 +262,14 @@ bool rAppMainView::eventFilter(QObject *obj, QEvent *event)
     return result;
 }
 
-void rAppMainView::sendCommand(RVR::CommandType type, int value)
+void rAppMainView::sendCommand(RVR::CommandType type, short value)
 {
     VLOG(2) << "Issuing [ "<< (int)type <<" ] command with value of: " << value;
     if (this->connected)
     {
         this->cmd->setCommandType(type);
-        unsigned char data[4];
+        char data[4];
 
-        data[0] = (value >> 24) & 0xFF;
-        data[1] = (value >> 16) & 0xFF;
         data[2] = (value >> 8) & 0xFF;
         data[3] = value & 0xFF;
 
@@ -269,7 +285,8 @@ void rAppMainView::sendCommand(RVR::CommandType type, int value)
 }
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     START_EASYLOGGINGPP(argc, argv);
     QApplication app(argc, argv);
 
@@ -280,7 +297,7 @@ int main(int argc, char *argv[]) {
     window.show();
 
     // Installing global event filter
-    QCoreApplication * rApp = QCoreApplication::instance();
+    QCoreApplication *rApp = QCoreApplication::instance();
     rApp->installEventFilter(&window);
 
     return app.exec();
