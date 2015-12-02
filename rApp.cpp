@@ -94,7 +94,7 @@ rAppMainView::rAppMainView(QWidget *parent)
     connect(this->frameTimer, SIGNAL(timeout()), this, SLOT(getFrames()));
 
     this->heartbeatTimer = new QTimer();
-    connect(this->heartbeatTimer, SIGNAL(timeout()), this, SLOT(sendHeartbeat()));
+    connect(this->heartbeatTimer, SIGNAL(timeout()), this, SLOT(processHeartbeat()));
 }
 
 void rAppMainView::waitForConnection()
