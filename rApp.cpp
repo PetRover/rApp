@@ -10,29 +10,54 @@ INITIALIZE_EASYLOGGINGPP;
 
 QFont statusFont = QFont("Lucida Grande", 50, QFont::Bold, false);
 QString buttonStyle = QString::fromUtf8("QPushButton{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
-                                                "stop: 0 #56D900, stop: 1 #50B700);"
+                                                "stop: 0 #FFFFFF, stop: 1 #ECECEC);"
                                                 "border-style: solid;"
-                                                "border-color: black;"
+                                                "border-color: #EFA756;"
                                                 "border-width: 2px;"
                                                 "border-radius: 10px;}");
 
 QString controlButtonStyle = QString::fromUtf8("QPushButton{background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
-                                                "stop: 0 white, stop: 1 gray);"
-                                                "border-style: solid;"
-                                                "border-color: black;"
-                                                "border-width: 2px;"
-                                                "border-radius: 10px;}");
+                                                       "stop: 0 #FFFFFF, stop: 1 #ECECEC);"
+                                                       "border-style: solid;"
+                                                       "border-color: #EFA756;"
+                                                       "border-width: 2px;"
+                                                       "border-radius: 10px;}");
 
 rAppMainView::rAppMainView(QWidget *parent)
 : QWidget(parent)
 {
+    this->treatCount = 6;
     this->cmd = new RVR::Command();
     this->networkManager = new RVR::NetworkManager();
     this->networkManager->setConnectTimeout(10000); // how long to wait after waitForConnection has been pressed
     this->currentCamChunk = new RVR::NetworkChunk();
+    this->currentCommandChunk = new RVR::NetworkChunk();
 
-    this->cameraImage = QImage( CAMERA_RES_WIDTH, CAMERA_RES_HEIGHT, QImage::Format_RGB888);
-    this->cameraImage.fill(Qt::black);
+    QString treatFullFilename = "TreatFull.png";
+    QString treatUsedFilename = "TreatUsed.png";
+    this->treatFull = new QImage(treatFullFilename, "png");
+    this->treatUsed = new QImage(treatUsedFilename, "png");
+
+    QString logoFileName = "RoverLogo.jpg";
+    this->cameraImage = QImage(logoFileName, "JPG");
+//    this->cameraImage = QImage( CAMERA_RES_WIDTH, CAMERA_RES_HEIGHT, QImage::Format_RGB888);
+
+    this->treatCountHolder = new QWidget(this);
+    this->treatCountHolder->resize(80,CAMERA_RES_HEIGHT);
+    this->treatCountHolder->move(CAMERA_RES_WIDTH-60,25);
+    QVBoxLayout* treatImageLayout = new QVBoxLayout(this->treatCountHolder);
+    this->treatCountHolder->setLayout(treatImageLayout);
+
+    for (int i=0;i<10;i++)
+    {
+        this->treatImageLabels[i] = new QLabel(this->treatCountHolder);
+        this->treatImageLabels[i]->resize(35,35);
+        this->treatImageLabels[i]->setPixmap(QPixmap::fromImage(*this->treatFull));
+        treatImageLayout->addWidget(this->treatImageLabels[i], 1, Qt::AlignCenter);
+    }
+
+    this->updateTreatCount();
+    this->treatCountHolder->hide();
 
     this->connectButton = new QPushButton("CONNECT", this);
 
@@ -46,30 +71,44 @@ rAppMainView::rAppMainView(QWidget *parent)
     this->progressBar = new QProgressBar(this);
     this->progressBar->setMinimum(0);
     this->progressBar->setMaximum(0);
-    this->progressBar->setValue(1);
+    this->progressBar->setValue(0);
 
-    QGridLayout* layout = new QGridLayout(this);
-    layout->addWidget(this->statusLabel, 0, 0, Qt::AlignCenter);
-    layout->addWidget(this->progressBar, 1, 0, Qt::AlignCenter);
+    this->chargingLabel = new QLabel(this);
+    QString chargingIconFilename = "chargingIcon.png";
+    this->chargingImage = new QImage(chargingIconFilename, "PNG");
+    this->chargingLabel->setPixmap(QPixmap::fromImage(*this->chargingImage));
+    this->chargingLabel->resize(300,400);
+    this->chargingLabel->move(CAMERA_RES_WIDTH/2 - 300/2, 50);
+    this->chargingLabel->hide();
+
+
+    QSpacerItem* spacer = new QSpacerItem(300, 300, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->addItem(spacer);
+    layout->addWidget(this->statusLabel);
+    layout->addWidget(this->progressBar);
+    layout->setAlignment(this->statusLabel, Qt::AlignCenter);
+    layout->setAlignment(this->progressBar, Qt::AlignCenter);
+
     this->progressBar->hide();
     this->statusLabel->hide();
     this->statusLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     this->statusLabel->setFont(statusFont);
     this->progressBar->setFixedWidth(300);
 
-    this->connectButton->move(CAMERA_RES_WIDTH / 2 - 25, CAMERA_RES_HEIGHT / 2- 10);
+    this->connectButton->move(CAMERA_RES_WIDTH / 2 - 25, CAMERA_RES_HEIGHT - 100);
     this->connectButton->setStyleSheet(buttonStyle);
     this->connectButton->resize(100, 60);
 
 
     this->flipCameraButton->setStyleSheet(controlButtonStyle);
-    this->flipCameraButton->setFixedSize(100,60);
+    this->flipCameraButton->setFixedSize(100,30);
     this->startStreamButton->setStyleSheet(controlButtonStyle);
-    this->startStreamButton->setFixedSize(100,60);
+    this->startStreamButton->setFixedSize(100,30);
     this->dispenseTreatButton->setStyleSheet(controlButtonStyle);
-    this->dispenseTreatButton->setFixedSize(100,60);
+    this->dispenseTreatButton->setFixedSize(100,30);
     this->controlHolder->hide();
-    this->controlHolder->resize(CAMERA_RES_WIDTH, 60);
+    this->controlHolder->resize(CAMERA_RES_WIDTH, 90);
     this->controlHolder->move(0,CAMERA_RES_HEIGHT-60);
     QGridLayout* controlLayout = new QGridLayout(this->controlHolder);
     controlLayout->addWidget(this->flipCameraButton, 0, 0, Qt::AlignCenter);
@@ -84,6 +123,8 @@ rAppMainView::rAppMainView(QWidget *parent)
     this->roverStreamLabel->resize(CAMERA_RES_WIDTH, CAMERA_RES_HEIGHT);
     this->roverStreamLabel->setPixmap(QPixmap::fromImage(this->cameraImage));
     this->roverStreamLabel->stackUnder(this->connectButton);
+    this->roverStreamLabel->stackUnder(this->treatCountHolder);
+//    this->roverStreamLabel->stackUnder(this->chargingLabel);
 
     connect(this->connectButton, SIGNAL(clicked()), this, SLOT(waitForConnection()));
     connect(this->startStreamButton, SIGNAL(clicked()), this, SLOT(startStream()));
@@ -132,6 +173,7 @@ void rAppMainView::waitForConnection()
     if (this->connected)
     {
         this->controlHolder->show();
+        this->treatCountHolder->show();
     }
     else
     {
@@ -157,11 +199,26 @@ void rAppMainView::flipCamera()
 void rAppMainView::dispenseTreat()
 {
     this->sendCommand(RVR::CommandType::DISPENSE_TREAT, 0);
+    this->treatCount -= 1;
+    this->updateTreatCount();
+
 }
 
 void rAppMainView::updateTreatCount()
 {
-
+    int place;
+    for (int i=0;i<10;i++)
+    {
+        place = 9-i;
+        if (this->treatCount <= place)
+        {
+            this->treatImageLabels[i]->setPixmap(QPixmap::fromImage(*this->treatUsed));
+        }
+        else
+        {
+            this->treatImageLabels[i]->setPixmap(QPixmap::fromImage(*this->treatFull));
+        }
+    }
 }
 
 void rAppMainView::getFrames()
@@ -176,6 +233,17 @@ void rAppMainView::getFrames()
             unsigned char* jpegData = (unsigned char*)this->currentCamChunk->getData();
             this->cameraImage.loadFromData(jpegData, this->currentCamChunk->getLength(), "JPEG");
             this->roverStreamLabel->setPixmap(QPixmap::fromImage(this->cameraImage));
+        }
+    }
+
+    rt = this->networkManager->getData("COMMANDS", this->currentCommandChunk);
+    if (rt == RVR::ReceiveType::NETWORKCHUNK)
+    {
+        switch (this->currentCommandChunk->getDataType())
+        {
+            case RVR::DataType::COMMAND:
+
+                break;
         }
     }
     VLOG(3) << "[DONE] getting frames ";

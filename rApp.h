@@ -42,6 +42,15 @@ private:
     QPushButton *flipCameraButton;
     QPushButton *dispenseTreatButton;
     QWidget *controlHolder;
+    QWidget *treatCountHolder;
+    QLabel* treatImageLabels[10];
+    QImage* treatFull;
+    QImage* treatUsed;
+    QImage* chargingImage;
+    QLabel* chargingLabel;
+    RVR::NetworkChunk* currentCommandChunk;
+
+    int treatCount;
 
     bool cameraFlipped = false;
     bool connected = false;

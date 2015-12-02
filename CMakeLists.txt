@@ -41,18 +41,28 @@ find_package(YCM REQUIRED)
 FIND_PACKAGE(FFMPEG REQUIRED)
 TARGET_LINK_LIBRARIES(rApp ${FFMPEG_LIBRARIES})
 
-#
-#find_package(PkgConfig)
-##pkg_search_module(SWSCALE REQUIRED libswscale.pc)
-#
-#target_include_directories(rApp SYSTEM PUBLIC ${FFMPEG_INCLUDE_DIRS})
-#target_link_libraries(rApp ${FFMPEG_LIBRARIES})
-##TARGET_LINK_LIBRARIES(rApp swscale)
-#TARGET_LINK_LIBRARIES(rApp avutil)
-#TARGET_LINK_LIBRARIES(rApp avcodec)
-#TARGET_LINK_LIBRARIES(rCamera ${libuvc_LIBRARIES})
+SET(noParenSourcePath "")
+SET(noParenBinPath "")
+STRING(REPLACE "(" "\\(adfasdf" noParenSourcePath ${CMAKE_CURRENT_SOURCE_DIR})
+STRING(REPLACE ")" "\\)" noParenSourcePath ${CMAKE_CURRENT_SOURCE_DIR})
+STRING(REPLACE "(" "\\(" noParenBinPath ${CMAKE_CURRENT_BINARY_DIR})
+STRING(REPLACE ")" "\\)" noParenBinPath ${CMAKE_CURRENT_BINARY_DIR})
 
-#get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-#foreach(dir ${dirs})
-#    message(STATUS "dir='${dir}'")
-#endforeach()
+#if (NOT CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+#
+#    # list of files for which we add a copy rule
+#    set(data_RAPP RoverLogo.jpg)
+#
+#    foreach(item IN LISTS data_RAPP)
+#        message(STATUS ${item})
+#        add_custom_command(
+#                OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${item}"
+#                COMMAND ${CMAKE_COMMAND} -E copy "\"${noParenSourcePath}/${item}\"" "\"${noParenBinPath}/${item}\""
+#                DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${item}"
+#        )
+#    endforeach()
+#endif()
+#
+## files are only copied if a target depends on them
+#add_custom_target(data-target ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/RoverLogo.jpg")
+#ADD_DEPENDENCIES(rApp data-target)
