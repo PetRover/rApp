@@ -110,7 +110,7 @@ void rAppMainView::waitForConnection()
     {
 //        if (this->networkManager->initializeNewConnectionAndConnect("HEARTBEAT", APP_IP, ROVER_IP, 1026, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::TCP))
 //        {
-            if (this->networkManager->initializeNewConnectionAndConnect("CAMERA", APP_IP, ROVER_IP, 1038, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP))
+            if (this->networkManager->initializeNewConnectionAndConnect("CAMERA", APP_IP, ROVER_IP, 1039, RVR::ConnectionInitType::LISTEN, RVR::ConnectionProtocol::UDP))
             {
                 this->connected = true;
 //                this->heartbeatTimer->start(1000);
