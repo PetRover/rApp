@@ -183,7 +183,7 @@ void rAppMainView::getFrames()
 
 void rAppMainView::processHeartbeat()
 {
-    this->networkManager->sendHeartBeat();
+//    this->networkManager->sendHeartBeat();
 }
 
 
